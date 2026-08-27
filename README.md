@@ -143,15 +143,17 @@ npx rolldown -c rolldown.config.mjs
 
 ```text
 Bili2Nico/
-├── extension/
-│   ├── manifest.json          # MV3 扩展清单
-│   ├── content.js             # 内容脚本：抓取/转换/渲染/覆盖层
-│   ├── popup.html / popup.js  # 右上角设置页
-│   ├── background.js          # 空 MV3 service worker
-│   ├── lib/
-│   │   └── niconicomments.js  # niconicomments v0.4.0 构建产物（UMD）
-├── compare.html             # B站 / N站 弹幕模式与指令对比
-└── niconicomments-0.4.0/     # 参考源码（可重新构建 lib）
+├── .gitignore                  # 忽略第三方源码与构建产物
+├── README.md                   # 项目说明（中文 + 日文）
+├── compare.html                # B站 / N站 弹幕模式与指令对比
+└── extension/
+    ├── manifest.json           # MV3 扩展清单
+    ├── content.js              # 内容脚本：抓取/转换/渲染/覆盖层
+    ├── popup.html              # 右上角设置页
+    ├── popup.js                # 设置页脚本
+    ├── background.js           # 空 MV3 service worker
+    └── lib/
+        └── niconicomments.js   # niconicomments v0.4.0 构建产物（UMD）
 ```
 
 ## License
@@ -315,15 +317,17 @@ npx rolldown -c rolldown.config.mjs
 
 ```text
 Bili2Nico/
-├── extension/
-│   ├── manifest.json          # MV3 拡張機能リスト
-│   ├── content.js             # 取得/変換/描画/オーバーレイ
-│   ├── popup.html / popup.js  # 設定ページ
-│   ├── background.js          # 空の MV3 service worker
-│   └── lib/
-│       └── niconicomments.js  # niconicomments v0.4.0 ビルド成果物（UMD）
-├── compare.html             # B站 / N站 モード・コマンド比較
-└── niconicomments-0.4.0/     # 参考ソース（lib 再構築用）
+├── .gitignore                  # 第三-party ソースとビルド成果物を除外
+├── README.md                   # プロジェクト説明（中国語 + 日本語）
+├── compare.html                # B站 / N站 モード・コマンド比較
+└── extension/
+    ├── manifest.json           # MV3 拡張機能リスト
+    ├── content.js              # 取得/変換/描画/オーバーレイ
+    ├── popup.html              # 設定ページ
+    ├── popup.js                # 設定ページスクリプト
+    ├── background.js           # 空の MV3 service worker
+    └── lib/
+        └── niconicomments.js   # niconicomments v0.4.0 ビルド成果物（UMD）
 ```
 
 ## License
