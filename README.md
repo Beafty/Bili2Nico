@@ -179,6 +179,8 @@ MIT（本扩展）。`niconicomments` 使用 [MIT License](https://github.com/xp
 
 > B 站（Bilibili）の動画ページ上で、N 站（Niconico / ニコニコ）のコメント描画ロジックを再現する Chrome 拡張機能です。
 
+> 用語メモ：本文では「コメント」と「弾幕（danmaku）」を同じ意味で扱います。中国語版の「弹幕」に対応します。
+
 Bili2Nico は Chrome (Manifest V3) ブラウザ拡張機能です。B 站の動画ページからコメント（弾幕）データを取得し、
 Niconico 公式プレイヤー互換のコメント描画ライブラリ
 [`@xpadev-net/niconicomments`](https://github.com/xpadev-net/niconicomments) v0.4.0 で描画します。
