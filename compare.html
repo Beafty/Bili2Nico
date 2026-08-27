@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B站 vs N站 弹幕模式与指令对比</title>
+<style>
+  :root { --bg: #f7f8fa; --card: #fff; --text: #1f2329; --muted: #646a73; --border: #e4e6eb; --accent: #00a1d6; --accent-dark: #0087b0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif; line-height: 1.7; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { background: linear-gradient(135deg, #00a1d6, #0087b0); color: #fff; padding: 28px 24px; border-radius: 14px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 6px; font-size: 28px; }
+  header p { margin: 0; color: rgba(255,255,255,.92); font-size: 15px; }
+  main { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px 30px; }
+  h2 { margin: 34px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border); font-size: 21px; color: var(--accent-dark); }
+  h2:first-of-type { margin-top: 0; }
+  h3 { margin: 20px 0 8px; font-size: 16px; }
+  p, ul, ol { margin: 10px 0; }
+  ul, ol { padding-left: 26px; }
+  li { margin: 4px 0; }
+  code { background: #f0f2f5; border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: .9em; font-family: Consolas, Menlo, monospace; color: #c7254e; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--border); padding: 8px 11px; text-align: left; }
+  th { background: #f0f6fb; color: var(--accent-dark); }
+  tr:nth-child(even) td { background: #fafbfc; }
+  blockquote { margin: 14px 0; padding: 10px 16px; border-left: 4px solid var(--accent); background: #f0f6fb; color: var(--muted); border-radius: 0 6px 6px 0; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .split { grid-template-columns: 1fr; } }
+  .card-min { border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .color-sq { display: inline-block; width: 14px; height: 14px; border: 1px solid rgba(0,0,0,.15); border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+  .foot { margin-top: 22px; text-align: center; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>B站 vs N站 弹幕模式与指令对比</h1>
+    <p>Bilibili 使用数字 <code>mode</code>；Niconico（N站）使用 <code>mail</code> 命令字符串表达位置、字号、颜色、字体以及 NicoScript 指令。</p>
+  </header>
+
+  <main>
+    <h2>1. 总览</h2>
+    <p>B 站的弹幕“模式/类型”是一个 <strong>数字枚举</strong>（来自 <code>DanmakuElem.mode</code> / XML 中的 <code>p</code> 属性第 2 位）。
+       N 站的弹幕“模式”不是数字，而是写在 <code>mail</code> 字段里的 <strong>命令字符串</strong>，其中最核心的是位置命令：</p>
+    <table>
+      <thead><tr><th>维度</th><th>B站（数字/字段）</th><th>N站（mail 命令）</th></tr></thead>
+      <tbody>
+        <tr><td>模式 / 位置</td><td><code>mode</code>：1–9</td><td><code>naka</code> / <code>ue</code> / <code>shita</code></td></tr>
+        <tr><td>字号</td><td><code>fontsize</code>：18 / 25 / 36</td><td><code>small</code> / <code>medium</code> / <code>big</code></td></tr>
+        <tr><td>字体</td><td>无</td><td><code>defont</code> / <code>gothic</code> / <code>mincho</code> / <code>gulim</code> / <code>simsun</code></td></tr>
+        <tr><td>颜色</td><td>十进制 RGB888（如 16777215）</td><td>颜色名（<code>red</code>…）或 <code>#RRGGBB</code>（需 premium）</td></tr>
+        <tr><td>时间</td><td><code>progress</code>（毫秒）</td><td><code>vpos</code>（厘秒，= 毫秒 / 10）</td></tr>
+        <tr><td>逆向</td><td><code>mode=6</code>（单条弹幕属性）</td><td><code>@逆</code>（投稿者 NicoScript，全局时间段）</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2. 模式 / 类型对照表</h2>
+    <table>
+      <thead><tr><th>B站 mode</th><th>B站含义</th><th>N站等价</th><th>说明 / 本扩展映射</th></tr></thead>
+      <tbody>
+        <tr><td>1 / 2 / 3</td><td>普通滚动弹幕</td><td><code>naka</code></td><td>默认右→左</td></tr>
+        <tr><td>4</td><td>底部弹幕</td><td><code>shita</code></td><td>底部居中固定</td></tr>
+        <tr><td>5</td><td>顶部弹幕</td><td><code>ue</code></td><td>顶部居中固定</td></tr>
+        <tr><td>6</td><td>逆向弹幕</td><td>无单条等价（N站为 <code>@逆</code> 全局）</td><td>本扩展用 <code>naka</code> + <code>reverse:true</code>，左→右</td></tr>
+        <tr><td>7</td><td>高级弹幕</td><td>无直接等价</td><td>正文是 JSON；本扩展跳过</td></tr>
+        <tr><td>8</td><td>代码弹幕</td><td>无（N站没有代码弹幕）</td><td>本扩展跳过</td></tr>
+        <tr><td>9</td><td>BAS 弹幕</td><td>无（BAS 是 B站特有，pool 必须为 2）</td><td>本扩展跳过</td></tr>
+      </tbody>
+    </table>
+    <blockquote>注意：B站 mode 2 / 3 在部分实现里历史上有“下端/……滚动”语义，但接口文档归为普通弹幕，本扩展统一按 <code>naka</code> 处理。</blockquote>
+
+    <h2>3. B站 弹幕字段 / 指令</h2>
+    <div class="split">
+      <div class="card-min">
+        <h3>核心字段</h3>
+        <ul>
+          <li><code>mode</code>：弹幕类型 1–9</li>
+          <li><code>progress</code>：出现时间（毫秒）</li>
+          <li><code>fontsize</code>：字号 18 / 25 / 36（也出现过 64 等非标准值）</li>
+          <li><code>color</code>：十进制 RGB888</li>
+          <li><code>pool</code>：0 普通 / 1 字幕 / 2 特殊（代码/BAS）</li>
+          <li><code>ctime</code>：发送时间戳</li>
+          <li><code>content</code>：正文</li>
+        </ul>
+      </div>
+      <div class="card-min">
+        <h3>其他字段</h3>
+        <ul>
+          <li><code>midHash</code>：发送者 hash</li>
+          <li><code>weight</code>：语义屏蔽权重 0–10</li>
+          <li><code>attr</code>：位标记（保护 / 直播 / 高赞）</li>
+          <li><code>idStr</code> / <code>id</code>：唯一 ID</li>
+          <li><code>action</code> / <code>animation</code>：动作 / 动画（高级弹幕用）</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>4. N站 弹幕 mail 指令</h2>
+    <div class="split">
+      <div class="card-min">
+        <h3>基础命令</h3>
+        <ul>
+          <li>位置：<code>naka</code> / <code>ue</code> / <code>shita</code></li>
+          <li>字号：<code>small</code> / <code>medium</code> / <code>big</code></li>
+          <li>字体：<code>defont</code> / <code>gothic</code> / <code>mincho</code> / <code>gulim</code> / <code>simsun</code></li>
+          <li>任意颜色：<code>#RRGGBB</code>（需 premium）</li>
+          <li>时长：<code>@数字</code>，如 <code>@3</code> 表示 3 秒</li>
+          <li>其他：<code>full</code>、<code>ender</code>、<code>_live</code>、<code>184</code>（匿名）等</li>
+        </ul>
+      </div>
+      <div class="card-min">
+        <h3>NicoScript（以 @ 开头，投稿者可用）</h3>
+        <ul>
+          <li><code>@逆</code>：全局逆向时间段（可带 <code>全</code>/<code>コメ</code>/<code>投コメ</code>）</li>
+          <li><code>@デフォルト</code>：设置默认命令</li>
+          <li><code>@コメント禁止</code>：禁止评论</li>
+          <li><code>@シーク禁止</code>：禁止跳转</li>
+          <li><code>@ジャンプ</code>：跳转到指定 sm/so/nm 等</li>
+          <li><code>@置換</code>：替换文本</li>
+          <li><code>@ボタン</code>：按钮评论</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>5. 字号与字体对应</h2>
+    <table>
+      <thead><tr><th>B站</th><th>N站 字号指令</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>fontsize</code> ≤ 18</td><td><code>small</code></td><td>小</td></tr>
+        <tr><td><code>fontsize</code> ≤ 25</td><td><code>medium</code></td><td>标准</td></tr>
+        <tr><td><code>fontsize</code> &gt; 25</td><td><code>big</code></td><td>大（36、64 等都归为 big）</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead><tr><th>N站 字体指令</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>defont</code></td><td>默认字体</td></tr>
+        <tr><td><code>gothic</code></td><td>哥特体</td></tr>
+        <tr><td><code>mincho</code></td><td>明朝体</td></tr>
+        <tr><td><code>gulim</code> / <code>simsun</code></td><td>Flash 字体，HTML5 渲染不推荐</td></tr>
+      </tbody>
+    </table>
+
+    <h2>6. 颜色对应</h2>
+    <table>
+      <thead><tr><th>颜色</th><th>HEX</th><th>N站颜色命令</th><th>B站十进制 RGB888 示例</th></tr></thead>
+      <tbody>
+        <tr><td><span class="color-sq" style="background:#FFFFFF"></span>白</td><td><code>#FFFFFF</code></td><td><code>white</code></td><td>16777215</td></tr>
+        <tr><td><span class="color-sq" style="background:#FF0000"></span>红</td><td><code>#FF0000</code></td><td><code>red</code></td><td>16711680</td></tr>
+        <tr><td><span class="color-sq" style="background:#FF8080"></span>粉</td><td><code>#FF8080</code></td><td><code>pink</code></td><td>16744576</td></tr>
+        <tr><td><span class="color-sq" style="background:#FFC000"></span>橙</td><td><code>#FFC000</code></td><td><code>orange</code></td><td>16760832</td></tr>
+        <tr><td><span class="color-sq" style="background:#FFFF00"></span>黄</td><td><code>#FFFF00</code></td><td><code>yellow</code></td><td>16776960</td></tr>
+        <tr><td><span class="color-sq" style="background:#00FF00"></span>绿</td><td><code>#00FF00</code></td><td><code>green</code></td><td>65280</td></tr>
+        <tr><td><span class="color-sq" style="background:#00FFFF"></span>青</td><td><code>#00FFFF</code></td><td><code>cyan</code></td><td>65535</td></tr>
+        <tr><td><span class="color-sq" style="background:#0000FF"></span>蓝</td><td><code>#0000FF</code></td><td><code>blue</code></td><td>255</td></tr>
+        <tr><td><span class="color-sq" style="background:#C000FF"></span>紫</td><td><code>#C000FF</code></td><td><code>purple</code></td><td>12583167</td></tr>
+        <tr><td><span class="color-sq" style="background:#000000"></span>黑</td><td><code>#000000</code></td><td><code>black</code></td><td>0</td></tr>
+      </tbody>
+    </table>
+    <blockquote>N站还有 <code>white2</code>/<code>niconicowhite</code>、<code>red2</code>/<code>truered</code>、<code>pink2</code>、<code>orange2</code>/<code>passionorange</code>、<code>yellow2</code>/<code>madyellow</code>、<code>green2</code>/<code>elementalgreen</code>、<code>cyan2</code>、<code>blue2</code>/<code>marinblue</code>、<code>purple2</code>/<code>nobleviolet</code>、<code>black2</code> 等变体。</blockquote>
+
+    <h2>7. 关键差异：逆向</h2>
+    <table>
+      <thead><tr><th>维度</th><th>B站</th><th>N站</th></tr></thead>
+      <tbody>
+        <tr><td>作用范围</td><td>单条弹幕（<code>mode=6</code>）</td><td>全局时间段（<code>@逆</code> 投稿者指令）</td></tr>
+        <tr><td>目标选择</td><td>无</td><td><code>全</code> / <code>コメ</code> / <code>投コメ</code></td></tr>
+        <tr><td>渲染</td><td>单条左到右</td><td>把正常右到左的 <code>getPosX</code> 做镜像：<code>canvasWidth - width - posX</code></td></tr>
+        <tr><td>固定弹幕</td><td>不受 mode 6 影响</td><td>固定在 <code>ue</code>/<code>shita</code> 时不参与逆向</td></tr>
+      </tbody>
+    </table>
+
+    <h2>8. 本扩展的实际映射汇总</h2>
+    <table>
+      <thead><tr><th>B站字段</th><th>转换结果（喂给 niconicomments）</th></tr></thead>
+      <tbody>
+        <tr><td>mode 1/2/3</td><td><code>mail: [naka, size, font]</code></td></tr>
+        <tr><td>mode 4</td><td><code>mail: [shita, size, font]</code></td></tr>
+        <tr><td>mode 5</td><td><code>mail: [ue, size, font]</code></td></tr>
+        <tr><td>mode 6</td><td><code>mail: [naka, size, font]</code> + <code>reverse: true</code></td></tr>
+        <tr><td>mode 7 / 8 / 9</td><td>跳过（不渲染）</td></tr>
+        <tr><td>fontsize 18 / 25 / 36（或按范围）</td><td><code>small</code> / <code>medium</code> / <code>big</code></td></tr>
+        <tr><td>color（十进制）</td><td><code>#RRGGBB</code>，并 <code>premium: true</code></td></tr>
+        <tr><td>progress（毫秒）</td><td><code>vpos</code> = <code>round(progress / 10)</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>9. 常见弹幕转换示例</h2>
+    <table>
+      <thead><tr><th>B站原始</th><th>转换后（formatted 输入）</th></tr></thead>
+      <tbody>
+        <tr><td><code>mode=1, fontsize=25, color=16777215, progress=1000</code></td><td><code>{vpos:100, mail:["naka","medium","defont"], content:"...", premium:true}</code></td></tr>
+        <tr><td><code>mode=4, fontsize=18, color=255, progress=2000</code></td><td><code>{vpos:200, mail:["shita","small","gothic"], content:"...", premium:true}</code></td></tr>
+        <tr><td><code>mode=5, fontsize=36, color=16776960, progress=3000</code></td><td><code>{vpos:300, mail:["ue","big","mincho"], content:"...", premium:true}</code></td></tr>
+        <tr><td><code>mode=6, fontsize=64, color=16777215, progress=1436</code></td><td><code>{vpos:143.6, mail:["naka","big"], reverse:true, premium:true}</code></td></tr>
+      </tbody>
+    </table>
+
+    <p class="foot">Bili2Nico · 弹幕模式与指令对比</p>
+  </main>
+</div>
+</body>
+</html>

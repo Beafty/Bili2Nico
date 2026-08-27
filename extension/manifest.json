@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Bili2Nico — Niconico Danmaku on Bilibili",
+  "version": "0.1.0",
+  "description": "Renders Bilibili 弹幕 using the Niconico (ニコニコ) comment playback engine (niconicomments).",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://api.bilibili.com/*",
+    "https://comment.bilibili.com/*",
+    "https://www.bilibili.com/*"
+  ],
+  "action": {
+    "default_title": "Bili2Nico 设置",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.bilibili.com/video/*"
+      ],
+      "js": [
+        "lib/niconicomments.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
