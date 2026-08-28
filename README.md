@@ -83,9 +83,9 @@ chrome://extensions
 
 1. 从 URL 解析 `BV` / `av` 号。
 2. 调用 `/x/web-interface/view` 获取 `cid`、`aid`、`duration`，失败时回退读取页面里的 `window.__INITIAL_STATE__`。
-3. 按弹幕来源设置请求弹幕：
-   - `segment`：`https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid={cid}&pid={aid}&segment_index={i}`；
-   - `XML`：`https://comment.bilibili.com/{cid}.xml`；
+3. 按弹幕来源设置请求弹幕，共有两种来源：
+   - `segment`（protobuf，完整历史弹幕）；
+   - `XML`（实时弹幕池，可能截断）；
    其中一种返回空或失败时，自动改用另一种兜底。
 4. 解析 protobuf 的 `DanmakuElem` 或 XML 的 `<d>` 节点。
 5. 转换成 niconicomments 的 `formatted` 输入。
@@ -262,9 +262,9 @@ chrome://extensions
 
 1. URL から `BV` / `av` を解析。
 2. `/x/web-interface/view` で `cid`、`aid`、`duration` を取得。失敗時はページ内の `window.__INITIAL_STATE__` を参照。
-3. コメント取得元の設定に応じて取得：
-   - `segment`：`https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid={cid}&pid={aid}&segment_index={i}`；
-   - `XML`：`https://comment.bilibili.com/{cid}.xml`；
+3. コメント取得元の設定に応じて取得。ソースは以下の二種類：
+   - `segment`（protobuf、完全な履歴）；
+   - `XML`（リアルタイムプール、場合により省略）；
    どちらかが空/失敗なら自動でもう一方へフォールバック。
 4. protobuf の `DanmakuElem` または XML の `<d>` を解析。
 5. niconicomments の `formatted` 入力に変換。
@@ -418,9 +418,9 @@ Settings persist via `chrome.storage.sync`.
 
 1. Parse `BV` / `av` from the URL.
 2. Call `/x/web-interface/view` for `cid`, `aid`, `duration` (fallback to `window.__INITIAL_STATE__`).
-3. Fetch danmaku per source setting:
-   - segment: `https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid={cid}&pid={aid}&segment_index={i}` (full history);
-   - XML: `https://comment.bilibili.com/{cid}.xml` (realtime pool, may be truncated);
+3. Fetch danmaku per source setting. There are two sources:
+   - segment (protobuf, full history);
+   - XML (realtime pool, may be truncated);
    fallback to the other if one fails or returns empty.
 4. Parse protobuf `DanmakuElem` or XML `<d>` nodes.
 5. Convert into niconicomments `formatted` input.
