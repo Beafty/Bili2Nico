@@ -43,9 +43,26 @@ const I18N = {
     debug: '右下のデバッグログパネルを表示',
     save: '設定を保存',
   },
+  en: {
+    title: 'Bili2Nico Settings',
+    langLabel: '语言 / 言語',
+    maxComments: 'Max danmaku limit (MAX_COMMENTS)',
+    maxHint: 'Comments above this count are truncated to avoid freezing during initialisation.',
+    commentLimit: 'Max comments per frame (commentLimit)',
+    limitHint: 'Keeps newer comments when the limit is exceeded.',
+    sourceMode: 'Danmaku source order',
+    font: 'Danmaku font',
+    opacity: 'Danmaku opacity',
+    renderMode: 'Render format',
+    lazy: 'Full danmaku (disable lazy layout, slight performance cost)',
+    debug: 'Show bottom-right debug log panel',
+    save: 'Save settings',
+  },
 };
 
 let opacityTimer = null;
+
+const normalizeLang = (lang) => (['zh', 'ja', 'en'].includes(lang) ? lang : 'zh');
 
 function getSettings() {
   return new Promise((resolve) => chrome.storage.sync.get(DEFAULTS, resolve));
@@ -59,7 +76,7 @@ function applyLang(lang) {
   });
   const langSel = document.getElementById('lang');
   if (langSel) langSel.value = lang;
-  document.documentElement.lang = lang === 'ja' ? 'ja' : 'zh-CN';
+  document.documentElement.lang = lang === 'en' ? 'en' : lang === 'ja' ? 'ja' : 'zh-CN';
 }
 
 function updateOpacityLabel() {
@@ -80,7 +97,7 @@ async function load() {
   const opacity = Math.round((Number(items.commentOpacity) || 1) * 100);
   document.getElementById('commentOpacity').value = opacity;
   updateOpacityLabel();
-  applyLang(items.lang || 'zh');
+  applyLang(normalizeLang(items.lang));
 }
 
 async function save() {
@@ -92,7 +109,7 @@ async function save() {
 
   const opacityPct = parseInt(document.getElementById('commentOpacity').value, 10);
   const opacity = Number.isNaN(opacityPct) ? DEFAULTS.commentOpacity : Math.max(0, Math.min(100, opacityPct)) / 100;
-  const lang = document.getElementById('lang').value === 'ja' ? 'ja' : 'zh';
+  const lang = normalizeLang(document.getElementById('lang').value);
 
   const settings = {
     maxComments: clampInt('maxComments', 1, 100000, DEFAULTS.maxComments),
@@ -108,7 +125,7 @@ async function save() {
 
   await chrome.storage.sync.set(settings);
   const msg = document.getElementById('msg');
-  msg.textContent = lang === 'ja' ? '設定を保存しました' : '已保存';
+  msg.textContent = lang === 'ja' ? '設定を保存しました' : lang === 'en' ? 'Saved' : '已保存';
   setTimeout(() => { msg.textContent = ''; }, 1500);
 }
 
@@ -116,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   load();
   document.getElementById('save').addEventListener('click', save);
   document.getElementById('lang').addEventListener('change', (e) => {
-    const lang = e.target.value === 'ja' ? 'ja' : 'zh';
+    const lang = normalizeLang(e.target.value);
     applyLang(lang);
     chrome.storage.sync.set({ lang: lang });
   });

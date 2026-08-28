@@ -1,6 +1,6 @@
 # Bili2Nico
 
-[中文](#bili2nico) / [日本語](#bili2nico-1)
+[中文](#bili2nico) / [日本語](#bili2nico-1) / [English](#bili2nico-2)
 
 > 在 B 站（Bilibili）上实现 N 站（Niconico/ニコニコ）弹幕播放逻辑的 Chrome 扩展。
 
@@ -74,7 +74,7 @@ chrome://extensions
 | 弹幕字体 | `defont` / `gothic` / `mincho` | `defont` |
 | 弹幕不透明度 | 0% 到 100%，拖动滑块实时更新 | 100% |
 | `lazy` | 关闭惰性布局，预计算所有弹幕位置 | 关 |
-| 语言 | 设置页界面语言：中文 / 日本語 | 中文 |
+| 语言 | 设置页界面语言：中文 / 日本語 / English | 中文 |
 | 显示右下角日志面板 | 是否显示调试日志面板 | 开 |
 
 设置通过 `chrome.storage.sync` 持久化，刷新页面后依然生效。
@@ -253,7 +253,7 @@ chrome://extensions
 | フォント | `defont` / `gothic` / `mincho` | `defont` |
 | 不透明度 | 0%〜100%、スライダーでリアルタイム更新 | 100% |
 | `lazy` | 惰性レイアウトを無効化し、全コメント位置を事前計算 | オフ |
-| 言語 | 設定ページの表示言語：中文 / 日本語 | 中文 |
+| 言語 | 設定ページの表示言語：中文 / 日本語 / English | 中文 |
 | 右下ログパネル表示 | デバッグログパネルを表示するか | ON |
 
 設定は `chrome.storage.sync` に保存され、リロード後も維持されます。
@@ -353,5 +353,140 @@ Dwango / Niconico の特許に抵触する可能性があると注記してい�
 - [niconicomments](https://github.com/xpadev-net/niconicomments)
 - [Bilibili API Collect - 弹幕文档](https://github.com/cps-open-source-fork/bilibili-API-collect)
 - [CommentCoreLibrary - 弾幕タイプ説明](https://commentcorelibrary.readthedocs.io/en/latest/CommentTypes/)
+- [W3C Danmaku Use Cases](https://w3c.github.io/danmaku/usecase.html)
+
+---
+
+# Bili2Nico
+
+> A Chrome extension that reproduces Niconico-style danmaku rendering on Bilibili video pages.
+
+Bili2Nico is a Chrome (Manifest V3) extension. It fetches danmaku (bullet comments) from a Bilibili video page and renders them using the Niconico-compatible library [`@xpadev-net/niconicomments`](https://github.com/xpadev-net/niconicomments) v0.4.0, converting Bilibili comments into Niconico-style output (lane layout, collision avoidance, top/middle/bottom, single-comment reverse, etc.).
+
+## Features
+
+- Only runs on Bilibili video pages (`https://www.bilibili.com/video/*`).
+- Multi-part support: selects the correct part's `cid` based on `?p=N`.
+- Danmaku source order selectable between segment (protobuf) first and XML first (default segment, auto-fallback).
+- Built-in minimal protobuf decoder; no external protobuf library required.
+- Converts Bilibili comment attributes to Niconico `formatted` input: position, size, colour, font, single-comment reverse, etc.
+- Uses the high-performance niconicomments engine.
+- Supports Bilibili `mode=6` reverse danmaku (single-comment, left-to-right).
+- Auto-syncs on video switching, play/pause/seek.
+- Render format selectable between Niconico style and native Bilibili.
+- Bottom-right realtime log panel: clear/collapse, logs reverse-comment attributes and fontsize mapping stats.
+- Bilibili VIP gradient colour (`colorful=60001`) is optimised with a per-character pink-to-white gradient.
+
+## Installation (Google Chrome)
+
+> Requires Chrome (or Chromium / Edge). No build step; load as an unpacked extension.
+
+1. Get the code:
+
+   ```bash
+   git clone https://github.com/Beafty/Bili2Nico
+   cd Bili2Nico
+   ```
+
+2. Open the extensions page:
+
+   ```text
+   chrome://extensions
+   ```
+
+3. Enable Developer mode.
+4. Click "Load unpacked" and select the `extension` folder.
+5. Open a Bilibili video page (e.g. `https://www.bilibili.com/video/BV1uW8B6KEE7`); the video is rendered in Niconico style, with status shown at the top of the bottom-right log panel. Click the **Bili2Nico** icon to open settings.
+
+## Settings
+
+| Setting | Description | Default |
+| --- | --- | --- |
+| `MAX_COMMENTS` | Max number of comments passed to the engine (extra are dropped) | 5000 |
+| `commentLimit` | Max comments drawn per frame; newer comments are kept when exceeded | 1000 |
+| Danmaku source order | `segment` (protobuf) or `XML` | `segment` |
+| Render format | Niconico style or native Bilibili | Niconico |
+| Font | `defont` / `gothic` / `mincho` | `defont` |
+| Opacity | 0% - 100%, updates in real time as you drag | 100% |
+| `lazy` | Disable lazy layout to precompute all positions | Off (use lazy) |
+| Language | UI language: Chinese / Japanese / English | Chinese |
+| Show log panel | Show the bottom-right debug log panel | On |
+
+Settings persist via `chrome.storage.sync`.
+
+## How it works
+
+1. Parse `BV` / `av` from the URL.
+2. Call `/x/web-interface/view` for `cid`, `aid`, `duration` (fallback to `window.__INITIAL_STATE__`).
+3. Fetch danmaku per source setting:
+   - segment: `https://api.bilibili.com/x/v2/dm/web/seg.so?type=1&oid={cid}&pid={aid}&segment_index={i}` (full history);
+   - XML: `https://comment.bilibili.com/{cid}.xml` (realtime pool, may be truncated);
+   fallback to the other if one fails or returns empty.
+4. Parse protobuf `DanmakuElem` or XML `<d>` nodes.
+5. Convert into niconicomments `formatted` input.
+6. Place a logical 1920x1080 transparent canvas over the video and drive `drawCanvas(video.currentTime * 100)` with `requestAnimationFrame`.
+
+## Bilibili / Niconico mode mapping
+
+| Bilibili `mode` | Meaning | Niconico equivalent | Mapping |
+| --- | --- | --- | --- |
+| 1 / 2 / 3 | Normal scroll | `naka` | right-to-left |
+| 4 | Bottom fixed | `shita` | bottom fixed |
+| 5 | Top fixed | `ue` | top fixed |
+| 6 | Reverse | no single equivalent (Niconico uses global `@逆`) | `naka` + `reverse:true`, left-to-right |
+| 7 | Advanced | none | skipped (JSON body) |
+| 8 | Code | none | skipped |
+| 9 | BAS | none (Bilibili-only) | skipped |
+
+See [`compare.html`](compare.html) for a detailed comparison.
+
+### Font size mapping
+
+| Bilibili `fontsize` | Niconico size command |
+| --- | --- |
+| ≤ 18 | `small` |
+| ≤ 25 | `medium` |
+| > 25 | `big` (36, 64, etc.) |
+
+## Performance
+
+- `MAX_COMMENTS` limits the total comments passed to the engine.
+- `lazy` (default on) computes only the current time window; disable it for full danmaku-artist output.
+- `commentLimit` limits per-frame drawing to avoid frame drops.
+- Videos with no danmaku finish initialisation immediately (no repeated retries).
+
+## Limitations
+
+- Advanced, code, and BAS danmaku are skipped.
+- Only normal video pages (BV / av) are supported.
+- In HTML5 rendering, `defont` / `gothic` / `mincho` are recommended.
+
+## Build from source
+
+`lib/niconicomments.js` is built from source:
+
+```bash
+cd niconicomments-0.4.0
+pnpm install
+npx rolldown -c rolldown.config.mjs
+# output: niconicomments-0.4.0/dist/bundle.js
+# copy to extension/lib/niconicomments.js
+```
+
+The extension itself needs no build; load it as an unpacked extension.
+
+## License
+
+MIT (this extension). `niconicomments` uses the MIT License.
+
+## Patent notice
+
+`niconicomments` notes that implementing the full flow of realtime comment fetching + screen drawing + posting may infringe patents held by Dwango / Niconico (see `ABOUT_PATENT.md`). This project is for study/research only; evaluate legal risk before commercial use.
+
+## References
+
+- [niconicomments](https://github.com/xpadev-net/niconicomments)
+- [Bilibili API Collect](https://github.com/cps-open-source-fork/bilibili-API-collect)
+- [CommentCoreLibrary](https://commentcorelibrary.readthedocs.io/en/latest/CommentTypes/)
 - [W3C Danmaku Use Cases](https://w3c.github.io/danmaku/usecase.html)
 
