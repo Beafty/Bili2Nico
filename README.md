@@ -28,7 +28,7 @@ Bili2Nico 是一个 Chrome (Manifest V3) 浏览器扩展，它从 B 站视频页
 ### 1. 获取代码
 
 ```bash
-git clone <你的仓库地址>
+git clone https://github.com/Beafty/Bili2Nico
 cd Bili2Nico
 ```
 
@@ -209,7 +209,7 @@ B 站のコメントを N 站風（レーン配置、重なり防止、上/中/�
 ### 1. ソースを取得
 
 ```bash
-git clone <あなたのリポジトリURL>
+git clone https://github.com/Beafty/Bili2Nico
 cd Bili2Nico
 ```
 
