@@ -932,7 +932,8 @@ Released under the MIT License.
 		layer: /* @__PURE__ */ optional(ZCommentLayer),
 		ignoreScale: /* @__PURE__ */ optional(/* @__PURE__ */ boolean(), false),
 		is_my_post: /* @__PURE__ */ optional(/* @__PURE__ */ boolean(), false),
-		reverse: /* @__PURE__ */ optional(/* @__PURE__ */ boolean(), false)
+		reverse: /* @__PURE__ */ optional(/* @__PURE__ */ boolean(), false),
+		gradient: /* @__PURE__ */ optional(/* @__PURE__ */ boolean(), false)
 	});
 	const ZFormattedComment = /* @__PURE__ */ pipe(ZFormattedCommentEntries, /* @__PURE__ */ transform((input) => {
 		var _input$layer;
@@ -4628,6 +4629,26 @@ Released under the MIT License.
 	const MAX_HTML5_COMMENT_IMAGE_WIDTH = 8184;
 	const MAX_HTML5_COMMENT_IMAGE_HEIGHT = 8184;
 	const MAX_HTML5_COMMENT_IMAGE_AREA = MAX_CANVAS_AREA;
+	const hexToRgb = (hex) => {
+		const h = hex.replace("#", "");
+		const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+		const n = parseInt(full, 16);
+		return [
+			n >> 16 & 255,
+			n >> 8 & 255,
+			n & 255
+		];
+	};
+	const rgbToHex = (r, g, b) => "#" + [
+		r,
+		g,
+		b
+	].map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("").toUpperCase();
+	const interpolateColor = (a, b, t) => {
+		const [ar, ag, ab] = hexToRgb(a);
+		const [br, bg, bb] = hexToRgb(b);
+		return rgbToHex(ar + (br - ar) * t, ag + (bg - ag) * t, ab + (bb - ab) * t);
+	};
 	const clampHTML5Content = (input) => {
 		let lineCount = 1;
 		let end = 0;
@@ -4967,8 +4988,26 @@ Released under the MIT License.
 						const line = lines[j];
 						if (line === void 0) continue;
 						const posY = (this.comment.lineHeight * (lineCount + 1 + paddingTop) + offsetY) / scale;
-						image.strokeText(line, 0, posY);
-						image.fillText(line, 0, posY);
+						if (this.comment.gradient && line.length > 0) {
+							var _item$width$j, _item$width;
+							const start = "#FF69B4";
+							const end = "#FFFFFF";
+							const lineWidth = (_item$width$j = (_item$width = item.width) === null || _item$width === void 0 ? void 0 : _item$width[j]) !== null && _item$width$j !== void 0 ? _item$width$j : 0;
+							let charX = 0;
+							for (const ch of Array.from(line)) {
+								const charW = image.measureText(ch).width;
+								const t = lineWidth > 0 ? charX / lineWidth : 0;
+								const col = interpolateColor(start, end, t);
+								image.setFillStyle(col);
+								image.setStrokeStyle(col);
+								image.strokeText(ch, charX, posY);
+								image.fillText(ch, charX, posY);
+								charX += charW;
+							}
+						} else {
+							image.strokeText(line, 0, posY);
+							image.fillText(line, 0, posY);
+						}
 						lineCount += 1;
 					}
 				}

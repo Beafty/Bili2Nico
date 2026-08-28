@@ -25,6 +25,7 @@
     commentOpacity: 1,
     font: 'defont',
     lazy: true,
+    lang: 'zh',
   };
 
   const state = {
@@ -395,7 +396,9 @@
       const content = e[7] ? readUtf8(e[7]) : '';
       const ctime = e[8] !== undefined ? Number(e[8]) : 0;
       const pool = e[11] !== undefined ? Number(e[11]) : 0;
-      elems.push({ progress, mode, fontsize, color, content, ctime, pool });
+      // DmColorfulType (field 24): 0 = none, 60001 = VIP gradient colour.
+      const colorful = e[24] !== undefined ? Number(e[24]) : 0;
+      elems.push({ progress, mode, fontsize, color, content, ctime, pool, colorful });
     }
     return elems;
   }
@@ -468,6 +471,11 @@
         if (Number.isFinite(col) && col !== 0xffffff) colorHex = hexColor(col);
       }
       if (colorHex) mail.push(colorHex);
+      // 大会员专属颜色 (DmColorfulType): 0 = none, 60001 = VIP 渐变色。
+      // Niconico 没有渐变文字色，因此保留基础 color 作为纯色近似，并在日志备注。
+      if (Number(e.colorful) === 60001) {
+        debugLog('info', '大会员专属颜色弹幕（colorful=60001 渐变色）：' + (colorHex || '默认白') + '，按纯色近似渲染');
+      }
       const vpos = Math.round(Number(e.progress) / 10); // ms -> centiseconds (Niconico vpos)
       if (!Number.isFinite(vpos)) continue;
       const reverse = mode === 6;
@@ -480,6 +488,7 @@
           sizeCommand: size,
           colorDec: typeof rawColor === 'string' ? rawColor : Number(rawColor),
           colorHex: colorHex,
+          colorful: Number(e.colorful) || 0,
           pool: Number(e.pool) || 0,
           ctime: Number(e.ctime) || 0,
           vpos: vpos,
@@ -494,6 +503,7 @@
         date: Number(e.ctime) || 0,
         premium: true, // allow arbitrary RGB colour codes to be rendered
         reverse: reverse,
+        gradient: Number(e.colorful) === 60001,
       });
     }
     debugLog('info', 'fontsize 映射统计: small=' + sizeStats.small + ', medium=' + sizeStats.medium + ', big=' + sizeStats.big + ', unknown=' + sizeStats.unknown + (sizeStats.unknownRaw.length ? '（未知值示例: ' + sizeStats.unknownRaw.join(',') + '）' : ''));

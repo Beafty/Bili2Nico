@@ -92,6 +92,7 @@
           <li><code>attr</code>：位标记（保护 / 直播 / 高赞）</li>
           <li><code>idStr</code> / <code>id</code>：唯一 ID</li>
           <li><code>action</code> / <code>animation</code>：动作 / 动画（高级弹幕用）</li>
+          <li><code>colorful</code>：大会员专属颜色（`DmColorfulType`，`60001` = 渐变色）</li>
         </ul>
       </div>
     </div>
@@ -160,18 +161,7 @@
     </table>
     <blockquote>N站还有 <code>white2</code>/<code>niconicowhite</code>、<code>red2</code>/<code>truered</code>、<code>pink2</code>、<code>orange2</code>/<code>passionorange</code>、<code>yellow2</code>/<code>madyellow</code>、<code>green2</code>/<code>elementalgreen</code>、<code>cyan2</code>、<code>blue2</code>/<code>marinblue</code>、<code>purple2</code>/<code>nobleviolet</code>、<code>black2</code> 等变体。</blockquote>
 
-    <h2>7. 关键差异：逆向</h2>
-    <table>
-      <thead><tr><th>维度</th><th>B站</th><th>N站</th></tr></thead>
-      <tbody>
-        <tr><td>作用范围</td><td>单条弹幕（<code>mode=6</code>）</td><td>全局时间段（<code>@逆</code> 投稿者指令）</td></tr>
-        <tr><td>目标选择</td><td>无</td><td><code>全</code> / <code>コメ</code> / <code>投コメ</code></td></tr>
-        <tr><td>渲染</td><td>单条左到右</td><td>把正常右到左的 <code>getPosX</code> 做镜像：<code>canvasWidth - width - posX</code></td></tr>
-        <tr><td>固定弹幕</td><td>不受 mode 6 影响</td><td>固定在 <code>ue</code>/<code>shita</code> 时不参与逆向</td></tr>
-      </tbody>
-    </table>
-
-    <h2>8. 本扩展的实际映射汇总</h2>
+    <h2>7. 本扩展的实际映射汇总</h2>
     <table>
       <thead><tr><th>B站字段</th><th>转换结果（喂给 niconicomments）</th></tr></thead>
       <tbody>
@@ -186,7 +176,7 @@
       </tbody>
     </table>
 
-    <h2>9. 常见弹幕转换示例</h2>
+    <h2>8. 常见弹幕转换示例</h2>
     <table>
       <thead><tr><th>B站原始</th><th>转换后（formatted 输入）</th></tr></thead>
       <tbody>
