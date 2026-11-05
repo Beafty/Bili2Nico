@@ -4991,14 +4991,14 @@ Released under the MIT License.
 						if (this.comment.gradient && line.length > 0) {
 							var _item$width$j, _item$width;
 							const start = "#FF69B4";
-							const end = "#FFFFFF";
+							const end = "#5B8FEF";
 							const lineWidth = (_item$width$j = (_item$width = item.width) === null || _item$width === void 0 ? void 0 : _item$width[j]) !== null && _item$width$j !== void 0 ? _item$width$j : 0;
 							let charX = 0;
+							image.setFillStyle(this.comment.color);
 							for (const ch of Array.from(line)) {
 								const charW = image.measureText(ch).width;
 								const t = lineWidth > 0 ? charX / lineWidth : 0;
 								const col = interpolateColor(start, end, t);
-								image.setFillStyle(col);
 								image.setStrokeStyle(col);
 								image.strokeText(ch, charX, posY);
 								image.fillText(ch, charX, posY);

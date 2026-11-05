@@ -105,7 +105,7 @@ chrome://extensions
 
 详细对比见 [`compare.html`](compare.html)。
 
-> 对 B 站大会员专属颜色（`colorful=60001`）做了渐变优化：按文字长度进行粉→白逐字渐变。
+> 对 B 站大会员专属颜色（`colorful=60001`）做了渐变优化：按文字长度进行粉→蓝描边渐变。
 
 ### 字号映射
 
@@ -180,31 +180,31 @@ MIT（本扩展）。`niconicomments` 使用 [MIT License](https://github.com/xp
 
 # Bili2Nico
 
-> B 站（Bilibili）の動画ページ上で、N 站（Niconico / ニコニコ）のコメント描画ロジックを再現する Chrome 拡張機能です。
+> Bilibili の動画ページ上で、Niconico（ニコニコ）のコメント描画ロジックを再現する Chrome 拡張機能です。
 
-> 用語メモ：本文では「コメント」と「弾幕（danmaku）」を同じ意味で扱います。中国語版の「弹幕」に対応します。
+> 用語メモ：本文では「コメント」と「弾幕（danmaku）」を同じ意味で扱います。中国語の「弹幕」に相当します。
 
-Bili2Nico は Chrome (Manifest V3) ブラウザ拡張機能です。B 站の動画ページからコメント（弾幕）データを取得し、
+Bili2Nico は Chrome（Manifest V3）のブラウザ拡張機能です。Bilibili の動画ページからコメント（弾幕）データを取得し、
 Niconico 公式プレイヤー互換のコメント描画ライブラリ
 [`@xpadev-net/niconicomments`](https://github.com/xpadev-net/niconicomments) v0.4.0 で描画します。
-B 站のコメントを N 站風（レーン配置、重なり防止、上/中/下、単発リバースなど）に変換します。
+Bilibili のコメントを Niconico 風（レーン配置、重なり防止、上固定・スクロール・下固定、コメント単体の逆向き表示など）に変換します。
 
 ## 機能
 
-- B 站の動画ページでのみ動作します。
-- 分P対応：`?p=N` に応じて該当する分Pのコメント/`cid` を選択します。
-- コメント取得元を「segment protobuf 優先」と「XML 優先」で切替、失敗時は自動で相互フォールバック。
-- 最小の protobuf デコーダを内蔵し、外部 protobuf ライブラリ不要。
-- B 站のコメント属性を N 站 `formatted` 入力へ変換：位置、サイズ、色、フォント、単発リバースなど。
-- niconicomments の高性能エンジンで描画。
-- B 站 `mode=6` リバースの単発描画に対応。
-- 動画切替、再生/一時停止/シークに自動同期。
-- レンダリング形式を N站 と B站 で切替可能。
-- 右下にリアルタイムログパネル：クリア/折りたたみに対応し、リバース弾幕の原属性と fontsize マッピング統計を出力。
+- Bilibili の動画ページでのみ動作します。
+- パート対応：`?p=N` に応じて、該当するパートのコメントと `cid` を選択します。
+- コメントの取得元を「segment（protobuf）優先」と「XML 優先」で切り替えられます。取得に失敗した場合は、自動で相互にフォールバックします。
+- 最小限の protobuf デコーダを内蔵しており、外部の protobuf ライブラリは不要です。
+- Bilibili のコメント属性（位置・サイズ・色・フォント・コメント単体の逆向き表示など）を Niconico の `formatted` 入力へ変換します。
+- niconicomments の高性能エンジンで描画します。
+- Bilibili の `mode=6` を、コメント単体の逆向きスクロールとして描画できます。
+- 動画の切り替えや再生・一時停止・シークに自動で追従します。
+- レンダリング形式は Niconico 風と Bilibili ネイティブを切り替えられます。
+- 右下にリアルタイムのログパネルを表示します（クリア・折りたたみに対応）。逆向きコメントの元の属性や fontsize のマッピング統計を出力します。
 
 ## インストール（Google Chrome）
 
-> Chrome（または Chromium / Edge）が必要です。ビルド不要で「展開された拡張機能」として読み込みます。
+> Chrome（または Chromium / Edge）が必要です。ビルドは不要で、「パッケージ化されていない拡張機能」として読み込みます。
 
 ### 1. ソースを取得
 
@@ -213,7 +213,7 @@ git clone https://github.com/Beafty/Bili2Nico
 cd Bili2Nico
 ```
 
-> Git が無い場合は ZIP をダウンロードして解凍してください。
+> Git がない場合は、リポジトリの ZIP をダウンロードして解凍してください。
 
 ### 2. 拡張機能管理ページを開く
 
@@ -221,74 +221,74 @@ cd Bili2Nico
 chrome://extensions
 ```
 
-### 3. 「デベロッパーモード」を有効にする
+### 3. 「デベロッパー モード」を有効にする
 
-右上の「デベロッパーモード」を ON にします。
+画面右上の「デベロッパー モード」を ON にします。
 
-### 4. 展開された拡張機能を読み込む
+### 4. パッケージ化されていない拡張機能を読み込む
 
-1. 「パッケージ化されていない拡張機能を読み込む」(Load unpacked) をクリック。
-2. このリポジトリの `extension` ディレクトリ（`manifest.json`、`content.js`、`lib/` などを含む）を選択。
+1. 「パッケージ化されていない拡張機能を読み込む」（Load unpacked）をクリックします。
+2. このリポジトリの `extension` ディレクトリ（`manifest.json`、`content.js`、`lib/` などを含む）を選択します。
 3. 読み込み完了後、ブラウザ右上に **Bili2Nico** アイコンが表示されます。
 
 ### 5. 使い方
 
-1. B 站の動画ページを開きます。例：
+1. Bilibili の動画ページを開きます。例：
 
    ```text
    https://www.bilibili.com/video/BV1uW8B6KEE7
    ```
 
-2. 拡張機能がコメントを取得し、N 站風に描画します。右下ログパネル上部に状態が表示されます。
-3. 右上の **Bili2Nico** アイコンをクリックすると設定ページを開けます。
+2. 拡張機能がコメントを取得し、Niconico 風に描画します。状態は右下のログパネル上部に表示されます。
+3. 右上の **Bili2Nico** アイコンをクリックすると、設定画面を開けます。
 
 ## 設定項目
 
 | 設定 | 説明 | 既定値 |
 | --- | --- | --- |
-| `MAX_COMMENTS` | エンジンへ渡すコメント総数の上限（超過分は切り捨て） | 5000 |
-| `commentLimit` | 1 フレームあたりの描画上限（超過時は新しいコメントを優先） | 1000 |
-| コメント取得元優先度 | `segment`（protobuf）または `XML` | `segment` |
-| レンダリング形式 | `N站（Niconico 風）` または `B站（ネイティブ）` | `N站` |
+| `MAX_COMMENTS` | エンジンへ渡すコメント総数の上限（超えた分は切り捨て） | 5000 |
+| `commentLimit` | 1 フレームあたりの描画上限（超えた場合は新しいコメントを優先） | 1000 |
+| コメント取得元の優先順位 | `segment`（protobuf）または `XML` | `segment` |
+| レンダリング形式 | `Niconico 風` または `Bilibili（ネイティブ）` | `Niconico 風` |
 | フォント | `defont` / `gothic` / `mincho` | `defont` |
-| 不透明度 | 0%〜100%、スライダーでリアルタイム更新 | 100% |
-| `lazy` | 惰性レイアウトを無効化し、全コメント位置を事前計算 | オフ |
-| 言語 | 設定ページの表示言語：中文 / 日本語 / English | 中文 |
-| 右下ログパネル表示 | デバッグログパネルを表示するか | ON |
+| 不透明度 | 0%〜100%、スライダーでリアルタイムに更新 | 100% |
+| `lazy` | 遅延レイアウトを無効化し、全コメントの位置を事前計算 | オフ |
+| 言語 | 設定画面の表示言語：中国語 / 日本語 / English | 中国語 |
+| 右下ログパネル表示 | デバッグ用ログパネルを表示するか | ON |
 
 設定は `chrome.storage.sync` に保存され、リロード後も維持されます。
 
 ## 原理
 
-1. URL から `BV` / `av` を解析。
-2. `/x/web-interface/view` で `cid`、`aid`、`duration` を取得。失敗時はページ内の `window.__INITIAL_STATE__` を参照。
-3. コメント取得元の設定に応じて取得。ソースは以下の二種類：
-   - `segment`（protobuf、完全な履歴）；
-   - `XML`（リアルタイムプール、場合により省略）；
-   どちらかが空/失敗なら自動でもう一方へフォールバック。
-4. protobuf の `DanmakuElem` または XML の `<d>` を解析。
-5. niconicomments の `formatted` 入力に変換。
-6. 1920x1080 論理座標の透明 canvas を動画上に置き、`requestAnimationFrame` で `drawCanvas(video.currentTime * 100)` を駆動。
+1. URL から `BV` / `av` を解析します。
+2. `/x/web-interface/view` で `cid`、`aid`、`duration` を取得します。失敗した場合は、ページ内の `window.__INITIAL_STATE__` を参照します。
+3. 設定した取得元に応じてコメントを取得します。取得元は次の 2 種類です。
+   - `segment`（protobuf）：完全な履歴
+   - `XML`：リアルタイムプール（省略される場合あり）
+   どちらかが空または失敗した場合は、自動でもう一方へフォールバックします。
+4. protobuf の `DanmakuElem` または XML の `<d>` を解析します。
+5. niconicomments の `formatted` 入力に変換します。
+6. 論理座標 1920x1080 の透明な canvas を動画の上に重ね、`requestAnimationFrame` で `drawCanvas(video.currentTime * 100)` を呼び出します。
 
-## B站 / N站 モード対照
+## Bilibili / Niconico モード対照
 
-| B站 `mode` | B站 の意味 | N站 相当 | 説明 / 本拡張のマッピング |
+| Bilibili `mode` | Bilibili での意味 | Niconico での相当 | 説明 / 本拡張でのマッピング |
 | --- | --- | --- | --- |
-| 1 / 2 / 3 | 通常スクロール | `naka` | 既定で右→左 |
-| 4 | 下固定 | `shita` | 下固定 |
-| 5 | 上固定 | `ue` | 上固定 |
-| 6 | リバース | 単発相当なし（N站は `@逆` のグローバル） | `naka` + `reverse:true`、左→右 |
-| 7 | 高度な弾幕 | 直接相当なし | 本体は JSON、本拡張ではスキップ |
+| 1 / 2 / 3 | 通常スクロール | `naka` | 既定では右→左 |
+| 4 | 下固定 | `shita` | 画面下部に固定 |
+| 5 | 上固定 | `ue` | 画面上部に固定 |
+| 6 | 逆向きスクロール | コメント単体の指定は不可（Niconico では `@逆` がグローバルコマンド） | `naka` + `reverse:true`、左→右 |
+| 7 | 高度な弾幕 | 直接の相当なし | 中身は JSON、本拡張ではスキップ |
 | 8 | コード弾幕 | なし | スキップ |
-| 9 | BAS 弾幕 | なし（B站 固有） | スキップ |
+| 9 | BAS 弾幕 | なし（Bilibili 固有） | スキップ |
 
 詳細は [`compare.html`](compare.html) を参照してください。
 
-> B站 大会員専用カラー（`colorful=60001`）をグラデーション最適化しました。文字長に応じてピンク→白のグラデーションで描画します。
+> Bilibili プレミアム会員限定のカラー（`colorful=60001`）は、文字数に応じてピンク→青のグラデーションで描画するよう最適化しています。
 
 ### サイズマッピング
 
-| B站 `fontsize` | N站 サイズ指令 |
+| Bilibili `fontsize` | Niconico のサイズコマンド |
 | --- | --- |
 | ≤ 18 | `small` |
 | ≤ 25 | `medium` |
@@ -296,26 +296,26 @@ chrome://extensions
 
 ## パフォーマンス
 
-- `MAX_COMMENTS`：エンジンへ渡すコメント総数を制限し、巨大動画の初期化停止を防ぐ。
-- `lazy`：既定で有効。設定で無効化すると全ての位置を事前計算。
-- `commentLimit`：1 フレームの描画数を制限し、フレーム落ちを防ぐ。
-- コメントが空の動画は初期化を即終了し、再試行しません。
+- `MAX_COMMENTS`：エンジンへ渡すコメント総数を制限し、巨大な動画で初期化が止まるのを防ぎます。
+- `lazy`：既定で有効です。設定で無効にすると、全コメントの位置を事前に計算します。
+- `commentLimit`：1 フレームあたりの描画数を制限し、フレーム落ちを防ぎます。
+- コメントが空の動画は初期化を即座に終了し、再試行しません。
 
 ## 制限
 
-- 高度な弾幕、コード弾幕、BAS 弾幕はスキップ。
-- 通常の動画ページ（BV / av）のみ対応。
-- HTML5 描画では `defont` / `gothic` / `mincho` を推奨。
+- 高度な弾幕、コード弾幕、BAS 弾幕はスキップします。
+- 通常の動画ページ（BV / av）のみ対応しています。
+- HTML5 描画では `defont` / `gothic` / `mincho` の使用を推奨します。
 
 ## ソースからのビルド
 
-`lib/niconicomments.js` はソースから構築します：
+`lib/niconicomments.js` はソースからビルドします：
 
 ```bash
 cd niconicomments-0.4.0
 pnpm install
 npx rolldown -c rolldown.config.mjs
-# 成果物：niconicomments-0.4.0/dist/bundle.js
+# 出力：niconicomments-0.4.0/dist/bundle.js
 # これを extension/lib/niconicomments.js にコピー
 ```
 
@@ -325,15 +325,15 @@ npx rolldown -c rolldown.config.mjs
 
 ```text
 Bili2Nico/
-├── .gitignore                  # 第三-party ソースとビルド成果物を除外
-├── README.md                   # プロジェクト説明（中国語 + 日本語）
-├── compare.html                # B站 / N站 モード・コマンド比較
+├── .gitignore                  # サードパーティのソースとビルド成果物を除外
+├── README.md                   # プロジェクト説明（中国語・日本語・英語）
+├── compare.html                # Bilibili / Niconico モード・コマンド比較
 └── extension/
-    ├── manifest.json           # MV3 拡張機能リスト
-    ├── content.js              # 取得/変換/描画/オーバーレイ
-    ├── popup.html              # 設定ページ
-    ├── popup.js                # 設定ページスクリプト
-    ├── background.js           # 空の MV3 service worker
+    ├── manifest.json           # MV3 マニフェスト
+    ├── content.js              # 取得・変換・描画・オーバーレイ
+    ├── popup.html              # 設定ポップアップ
+    ├── popup.js                # 設定ポップアップのスクリプト
+    ├── background.js           # 空の MV3 サービスワーカー
     └── lib/
         └── niconicomments.js   # niconicomments v0.4.0 ビルド成果物（UMD）
 ```
@@ -375,7 +375,7 @@ Bili2Nico is a Chrome (Manifest V3) extension. It fetches danmaku (bullet commen
 - Auto-syncs on video switching, play/pause/seek.
 - Render format selectable between Niconico style and native Bilibili.
 - Bottom-right realtime log panel: clear/collapse, logs reverse-comment attributes and fontsize mapping stats.
-- Bilibili VIP gradient colour (`colorful=60001`) is optimised with a per-character pink-to-white gradient.
+- Bilibili VIP gradient colour (`colorful=60001`) is optimised with a per-character pink-to-blue outline gradient.
 
 ## Installation (Google Chrome)
 
